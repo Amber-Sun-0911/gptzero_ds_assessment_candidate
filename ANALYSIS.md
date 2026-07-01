@@ -12,6 +12,7 @@
 
 ---
 
+
 ## TL;DR
 
 1. **Paid-only converts better, but unevenly.** Conversion rate is 4.99% vs. 3.98% in freemium (+1.0 pp, p = 0.007). Teachers and friend-referred users show the strongest uplift.
@@ -102,3 +103,13 @@ Teachers show the strongest conversion lift (+2.75 pp, z = −3.41, **p = 0.0006
 | | started_paid_plan (first) | 21 | 47 | 1.13% | 2.65% |
 
 Friend-referred users show the strongest and most significant conversion lift (+2.16 pp, z = −4.05, **p < 0.0001**). Social media users show virtually no treatment effect (4.83% vs. 4.80%).
+
+---
+
+## Submission Notes
+
+- **Code:** All SQL queries and Python analysis are included in the notebook linked at the top of this document. Code is not fully cleaned but is reproducible.
+- **Time spent:** ~2 hours, excluding breaks.
+- **Recommendations:** See Next Steps section above.
+- **AI assistance:** Used ChatGPT to enhance the TL;DR language and debug SQL syntax errors.
+- **Other notes:** No unclear instructions or problems encountered with the provided data.
