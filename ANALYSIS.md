@@ -114,6 +114,6 @@ How long did you spend on this takehome, ignoring breaks? ~ 2 hours
 
 What are your recommendations? included in the analysis
 
-What level of AI assistance you used + the transcript of your AI conversation with any agentic/chat tool you used. - chatgpt to enhance the tldr language. debug syntax errors
+What level of AI assistance you used + the transcript of your AI conversation with any agentic/chat tool you used. - claude code to debug syntax errors and commit and push to my github
 
 Anything you'd like us to know about your submission, for example if any instructions were unclear or if you encountered problems in the provided code - no
