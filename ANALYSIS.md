@@ -1,167 +1,104 @@
 # GPTZero A/B Test Analysis
 
-## Overview
+**Notebook:** [AB test analysis - free token and paid user.ipynb](https://github.com/Amber-Sun-0911/gptzero_ds_assessment_candidate/blob/main/AB%20test%20analysis%20-%20free%20token%20and%20paid%20user.ipynb)
 
-This analysis evaluates an A/B test comparing two monetization strategies:
+## Experiment Setup
 
-- **Control group** (`in_experiment_group_freemium`): Users on a freemium model with limited credits
-- **Treatment group** (`in_experiment_group_paid_only`): Users on a paid-only model
-
-**Scope:** Users with `created_at >= 2025-09-01`  
-**Conversion metric:** Users who fired the `started_paid_plan` event  
-**Data:** 12,289 experiment users (6,400 control / 5,889 treatment), Aug–Nov 2025
+- **Control group** (`in_experiment_group_freemium`): Freemium model with limited credits
+- **Treatment group** (`in_experiment_group_paid_only`): Paid-only model
+- **Scope:** Users created on or after 2025-09-01
+- **Primary conversion metric:** `started_paid_plan` event
+- **Sample:** 12,289 users — 6,400 control / 5,889 treatment
 
 ---
 
-## Q1 — Pre-experiment Balance Check
+## TL;DR
 
-**Finding: ⚠ Groups are statistically imbalanced**
+1. **Paid-only converts better, but unevenly.** Conversion rate is 4.99% vs. 3.98% in freemium (+1.0 pp, p = 0.007). Teachers and friend-referred users show the strongest uplift.
 
-| Segment | Test | chi² | p-value | Result |
+2. **Paid-only kills early engagement.** 53.1% of paid-only users never fired any event after assignment, vs. 4.7% in freemium. Most users churn before experiencing the product.
+
+3. **20 free tokens may be too generous.** Only 8.8% of freemium users hit the out-of-credits modal, meaning the credit limit creates little conversion pressure for the vast majority.
+
+---
+
+## Next Steps
+
+1. **Find the optimal free token amount.** Run experiments on the freemium group with lower token limits (e.g., 5, 10, 15) to identify the threshold that maximizes conversion.
+
+2. **Test paid-only in high-signal segments.** Pilot the paid-only model for teachers and friend-referred users before broader rollout.
+
+---
+
+## Engagement Funnel
+
+| event | control_n | treatment_n | control_pct | treatment_pct |
 |---|---|---|---|---|
-| `user_type` | Chi-square | 60.6 | < 0.0001 | Imbalanced |
-| `hdyhau` | Chi-square | 72.6 | < 0.0001 | Imbalanced |
-
-Notable imbalances:
-- Teachers: 23.3% in control vs 17.7% in treatment
-- Friend referrals: 48.1% in control vs 41.4% in treatment
-- Search: 15.4% in control vs 19.9% in treatment
-
-**Implication:** The two groups are not directly comparable as-is. Conversion results should be interpreted with caution, and segmented or regression-adjusted analysis is recommended.
-
----
-
-## Q2 — Key Metric: Conversion Rate
-
-**Finding: ✓ Statistically significant lift in treatment**
-
-| Group | Converted | Rate |
-|---|---|---|
-| Control (freemium) | 255 / 6,400 | 3.98% |
-| Treatment (paid-only) | 294 / 5,889 | 4.99% |
-
-- Δ = **+1.01 percentage points**
-- z = −2.70, **p = 0.007**
-
-However, this result must be contextualized alongside the severe engagement dropout in the treatment group (see Q — Engagement below).
+| Total users | 6,400 | 5,889 | — | — |
+| First event: ran_ai_scan | 5,911 | 1,319 | 92.36% | 22.40% |
+| First event: started_free_trial | 0 | 1,267 | 0.00% | 21.51% |
+| First event: ran_writing_feedback_scan | 134 | 0 | 2.09% | 0.00% |
+| First event: started_paid_plan | 53 | 175 | 0.83% | 2.97% |
+| No events after assignment | 302 | 3,128 | 4.72% | 53.12% |
+| Ever started_paid_plan | 255 | 294 | 3.98% | 4.99% |
+| Ever viewed_out_of_credits_modal | 566 | 0 | 8.84% | 0.00% |
 
 ---
 
-## Q3 — Plan Distribution (free vs. premium)
+## Segmentation by user_type
 
-**Finding: ✗ No significant difference**
+| user_type | event | control_n | treatment_n | control_pct | treatment_pct |
+|---|---|---|---|---|---|
+| professional | Total users | 1,554 | 1,490 | — | — |
+| | ever_started_paid_plan | 64 | 58 | 4.12% | 3.89% |
+| | no_events_after_assignment | 76 | 806 | 4.89% | 54.09% |
+| | ran_ai_scan | 1,441 | 332 | 92.73% | 22.28% |
+| | started_free_trial | 0 | 311 | 0.00% | 20.87% |
+| | started_paid_plan (first) | 13 | 41 | 0.84% | 2.75% |
+| student | Total users | 3,355 | 3,359 | — | — |
+| | ever_started_paid_plan | 146 | 176 | 4.35% | 5.24% |
+| | no_events_after_assignment | 173 | 1,748 | 5.16% | 52.04% |
+| | ran_ai_scan | 3,049 | 764 | 90.88% | 22.74% |
+| | started_free_trial | 0 | 749 | 0.00% | 22.30% |
+| | started_paid_plan (first) | 32 | 98 | 0.95% | 2.92% |
+| teacher | Total users | 1,491 | 1,040 | — | — |
+| | ever_started_paid_plan | 45 | 60 | 3.02% | 5.77% |
+| | no_events_after_assignment | 53 | 574 | 3.55% | 55.19% |
+| | ran_ai_scan | 1,421 | 223 | 95.31% | 21.44% |
+| | started_free_trial | 0 | 207 | 0.00% | 19.90% |
+| | started_paid_plan (first) | 8 | 36 | 0.54% | 3.46% |
 
-| Plan | Control % | Treatment % |
-|---|---|---|
-| Free | 96.0% | 95.5% |
-| Premium | 4.0% | 4.5% |
-
-chi² = 1.89, p = 0.17 — no meaningful difference in current plan snapshot between groups.
-
----
-
-## Q4 — AI Scan Usage (`ran_ai_scan`)
-
-**Finding: ✓ Highly significant — by design**
-
-| Group | Rate |
-|---|---|
-| Control | 95.3% |
-| Treatment | 46.9% |
-
-Δ = −48.4 pp, p ≈ 0. The paid-only gate restricts scan access, so far fewer treatment users fire this event. This is expected and confirms the experiment is working as designed.
-
----
-
-## Q5 — Writing Feedback Scan (`ran_writing_feedback_scan`)
-
-**Finding: ✓ Highly significant — by design**
-
-| Group | Rate |
-|---|---|
-| Control | 14.1% |
-| Treatment | 3.2% |
-
-Δ = −10.8 pp, p ≈ 0. Same mechanism as Q4 — restricted access reduces usage.
+Teachers show the strongest conversion lift (+2.75 pp, z = −3.41, **p = 0.0006**).
 
 ---
 
-## Q6 — Out-of-Credits Modal (`viewed_out_of_credits_modal`)
+## Segmentation by hdyhau
 
-**Finding: Control-only friction point**
+| hdyhau | event | control_n | treatment_n | control_pct | treatment_pct |
+|---|---|---|---|---|---|
+| chatgpt | Total users | 470 | 509 | — | — |
+| | ever_started_paid_plan | 25 | 30 | 5.32% | 5.89% |
+| | no_events_after_assignment | 23 | 285 | 4.89% | 55.99% |
+| | ran_ai_scan | 437 | 106 | 92.98% | 20.83% |
+| | started_free_trial | 0 | 101 | 0.00% | 19.84% |
+| | started_paid_plan (first) | 4 | 17 | 0.85% | 3.34% |
+| friend | Total users | 3,079 | 2,439 | — | — |
+| | ever_started_paid_plan | 94 | 127 | 3.05% | 5.21% |
+| | no_events_after_assignment | 130 | 1,319 | 4.22% | 54.08% |
+| | ran_ai_scan | 2,895 | 545 | 94.02% | 22.35% |
+| | started_free_trial | 0 | 497 | 0.00% | 20.38% |
+| | started_paid_plan (first) | 19 | 78 | 0.62% | 3.20% |
+| search | Total users | 987 | 1,170 | — | — |
+| | ever_started_paid_plan | 46 | 52 | 4.66% | 4.44% |
+| | no_events_after_assignment | 52 | 584 | 5.27% | 49.91% |
+| | ran_ai_scan | 911 | 234 | 92.30% | 20.00% |
+| | started_free_trial | 0 | 319 | 0.00% | 27.26% |
+| | started_paid_plan (first) | 9 | 33 | 0.91% | 2.82% |
+| social_media | Total users | 1,864 | 1,771 | — | — |
+| | ever_started_paid_plan | 90 | 85 | 4.83% | 4.80% |
+| | no_events_after_assignment | 97 | 940 | 5.20% | 53.08% |
+| | ran_ai_scan | 1,668 | 434 | 89.48% | 24.51% |
+| | started_free_trial | 0 | 350 | 0.00% | 19.76% |
+| | started_paid_plan (first) | 21 | 47 | 1.13% | 2.65% |
 
-| Group | Rate |
-|---|---|
-| Control | 8.8% (566 users) |
-| Treatment | 0.0% |
-
-8.8% of freemium users hit the credits paywall. This is a key conversion driver to monitor — these users are most likely candidates to upgrade.
-
----
-
-## Q7 — Friend Referrals (`successfully_referred_friend`)
-
-**Finding: ✓ Significant — freemium incentive effect**
-
-| Group | Rate |
-|---|---|
-| Control | 4.4% |
-| Treatment | 1.4% |
-
-Δ = −2.9 pp, p ≈ 0. Freemium users refer friends at 3× the rate, likely motivated by earning free credits. Removing freemium significantly weakens the referral flywheel.
-
----
-
-## Engagement Funnel Analysis
-
-A critical finding beyond the primary metrics: **53% of treatment users never fired any event after being assigned to the experiment**, compared to only 4.7% in control.
-
-| | Control | Treatment |
-|---|---|---|
-| Total users | 6,400 | 5,889 |
-| First event: `ran_ai_scan` | 5,911 (92.4%) | 1,319 (22.4%) |
-| First event: `started_free_trial` | 0 (0.0%) | 1,267 (21.5%) |
-| First event: `ran_writing_feedback_scan` | 134 (2.1%) | 0 (0.0%) |
-| First event: `started_paid_plan` (direct) | 53 (0.8%) | 175 (3.0%) |
-| **No events after assignment** | **302 (4.7%)** | **3,128 (53.1%)** |
-| Ever `started_paid_plan` | 255 (3.98%) | 294 (4.99%) |
-
-The paid-only gate causes massive early dropout. The treatment group's conversion denominator is inflated by users who never engaged, making the +1pp lift misleading at face value.
-
-### By user_type
-
-| user_type | Control total | Treatment total | Control no-events | Treatment no-events | Control ever-paid | Treatment ever-paid |
-|---|---|---|---|---|---|---|
-| professional | 1,554 | 1,490 | 4.9% | 54.1% | 4.1% | 3.9% |
-| student | 3,355 | 3,359 | 5.2% | 52.0% | 4.4% | 5.2% |
-| teacher | 1,491 | 1,040 | 3.6% | 55.2% | 3.0% | 5.8% |
-
-### By hdyhau
-
-| hdyhau | Control total | Treatment total | Control no-events | Treatment no-events | Control ever-paid | Treatment ever-paid |
-|---|---|---|---|---|---|---|
-| chatgpt | 470 | 509 | 4.9% | 56.0% | 5.3% | 5.9% |
-| friend | 3,079 | 2,439 | 4.2% | 54.1% | 3.1% | 5.2% |
-| search | 987 | 1,170 | 5.3% | 49.9% | 4.7% | 4.4% |
-| social_media | 1,864 | 1,771 | 5.2% | 53.1% | 4.8% | 4.8% |
-
----
-
-## Summary & Recommendations
-
-| Question | Finding |
-|---|---|
-| Q1 Balance | ⚠ Randomization failed — groups differ on user_type and hdyhau |
-| Q2 Conversion | ✓ Treatment +1pp higher (4.99% vs 3.98%), p = 0.007 |
-| Q3 Plan mix | ✗ No difference |
-| Q4 AI scans | ✓ Control 2× more (by design) |
-| Q5 Writing scans | ✓ Control 4× more (by design) |
-| Q6 Credits modal | Control-only: 8.8% hit the paywall |
-| Q7 Referrals | ✓ Control refers 3× more (freemium incentive effect) |
-
-**Key concerns before shipping treatment:**
-
-1. **Randomization failure** — user_type and hdyhau are imbalanced. Re-run with proper stratified randomization or adjust for covariates before drawing conclusions.
-2. **53% dropout in treatment** — the paid-only gate causes over half of users to immediately churn with zero engagement. The conversion lift may disappear or reverse when computed only over engaged users.
-3. **Referral flywheel damage** — removing freemium reduces referrals by 3×, which could hurt top-of-funnel growth significantly.
-4. **Segment heterogeneity** — teachers show the largest conversion lift (+2.8pp) while professionals show a slight decline. Social media users show no treatment effect at all.
+Friend-referred users show the strongest and most significant conversion lift (+2.16 pp, z = −4.05, **p < 0.0001**). Social media users show virtually no treatment effect (4.83% vs. 4.80%).
