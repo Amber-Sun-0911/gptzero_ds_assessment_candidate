@@ -106,10 +106,14 @@ Friend-referred users show the strongest and most significant conversion lift (+
 
 ---
 
-## Submission Notes
+Any code you wrote for analysis (doesn't have to be cleaned, but needs to be reproducible): included in this .md file
 
-- **Code:** All SQL queries and Python analysis are included in the notebook linked at the top of this document. Code is not fully cleaned but is reproducible.
-- **Time spent:** ~2 hours, excluding breaks.
-- **Recommendations:** See Next Steps section above.
-- **AI assistance:** Used ChatGPT to enhance the TL;DR language and debug SQL syntax errors.
-- **Other notes:** No unclear instructions or problems encountered with the provided data.
+A ANALYSIS.md or ANALYSIS.ipynb with the following:
+
+How long did you spend on this takehome, ignoring breaks? ~ 2 hours
+
+What are your recommendations? included in the analysis
+
+What level of AI assistance you used + the transcript of your AI conversation with any agentic/chat tool you used. - chatgpt to enhance the tldr language. debug syntax errors
+
+Anything you'd like us to know about your submission, for example if any instructions were unclear or if you encountered problems in the provided code - no
